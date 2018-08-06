@@ -1,5 +1,8 @@
 ## Hyperledger Fabric Client SDK for Node.js
 
+Added a function to enroll user using existing private key, the user can keep his private key with him/her and use this library to enroll with multiple CA servers using the same private key
+
+
 |Node 8 Build Status|
 |---|
 [![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-sdk-node8-merge-release-1.1-x86_64)](https://jenkins.hyperledger.org/view/fabric-sdk-node/job/fabric-sdk-node8-merge-release-1.1-x86_64/)|

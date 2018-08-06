@@ -1,10 +1,10 @@
 {
-  "name": "fabric-ca-client",
-  "version": "1.1.2",
+  "name": "fabric-ca-client-with-import",
+  "version": "1.1.3",
   "main": "index.js",
   "repository": {
-    "type": "gerrit",
-    "url": "http://gerrit.hyperledger.org/r/fabric-sdk-node"
+    "type": "git",
+    "url": "http://github.com/naqvijafar91/fabric-sdk-node"
   },
   "engines": {
     "node": "^8.9.0",
