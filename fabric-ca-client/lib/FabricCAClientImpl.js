@@ -241,6 +241,75 @@ var FabricCAServices = class extends BaseClient {
 	}
 
 	/**
+	 * Enroll the member using existing private key and return an opaque member object.
+	 * @param req the {@link EnrollmentRequest}
+	 * @returns Promise for an object with "key" for private key and "certificate" for the signed certificate
+	 */
+	enrollWithExistingKey(req) {
+		var self = this;
+
+		return new Promise(function (resolve, reject) {
+			if (typeof req === 'undefined' || req === null) {
+				logger.error('enroll() missing required argument "request"');
+				return reject(new Error('Missing required argument "request"'));
+			}
+			if (!req.enrollmentID) {
+				logger.error('Invalid enroll request, missing enrollmentID');
+				return reject(new Error('req.enrollmentID is not set'));
+			}
+
+			if (!req.enrollmentSecret) {
+				logger.error('Invalid enroll request, missing enrollmentSecret');
+				return reject(new Error('req.enrollmentSecret is not set'));
+			}
+
+			if(req.attr_reqs) {
+				if(!Array.isArray(req.attr_reqs)) {
+					logger.error('Invalid enroll request, attr_reqs must be an array of AttributeRequest objects');
+					return reject(new Error('req.attr_reqs is not an array'));
+				} else {
+					for(let i in req.attr_reqs) {
+						let attr_req = req.attr_reqs[i];
+						if(!attr_req.name) {
+							logger.error('Invalid enroll request, attr_reqs object is missing the name of the attribute');
+							return reject(new Error('req.att_regs is missing the attribute name'));
+						}
+					}
+				}
+			}
+
+			//generate enrollment certificate pair for signing
+			var opts;
+			opts = {ephemeral: true};
+			var privateKey= self.getCryptoSuite().importKey(req.key,opts);
+				
+					//generate CSR using enrollmentID for the subject
+					try {
+						var csr = privateKey.generateCSR('CN=' + req.enrollmentID);
+						self._fabricCAClient.enroll(req.enrollmentID, req.enrollmentSecret, csr, req.profile, req.attr_reqs)
+							.then(
+							function (enrollResponse) {
+								return resolve({
+									key: privateKey,
+									certificate: enrollResponse.enrollmentCert,
+									rootCertificate: enrollResponse.caCertChain
+								});
+							},
+							function (err) {
+								return reject(err);
+							}
+							);
+
+					} catch (err) {
+						return reject(new Error(util.format('Failed to generate CSR for enrollmemnt due to error [%s]', err)));
+					}
+				
+				
+
+		});
+	}
+
+	/**
 	 * Re-enroll the member in cases such as the existing enrollment certificate is about to expire, or
 	 * it has been compromised
 	 * @param {User} currentUser The identity of the current user that holds the existing enrollment certificate
